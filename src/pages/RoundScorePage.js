@@ -10,7 +10,7 @@ import { usePlayerContext } from '../HOC/withPlayerContext'
 
 const RoundScorePage = () => {
   const { playersState } = usePlayerContext()
-  const { handleGameStateChange } = useGameContext()
+  const { handleScoreStateChange } = useGameContext()
 
   const initialActiveScore = { id: playersState?.[0]?.id, name: playersState?.[0]?.name }
 
@@ -29,11 +29,23 @@ const RoundScorePage = () => {
     setIsNonActiveScore(initialNonActiveScore)
   }, [isActiveScore])
 
-  console.log('playersState', playersState)
-
-  console.log('isNonActiveScore', isNonActiveScore)
-
-  console.log('isActiveScore', isActiveScore)
+  const books = [
+    {
+      field: 'dirty',
+      scoreType: 'books',
+      label: 'Dirty',
+    },
+    {
+      field: 'clean',
+      scoreType: 'books',
+      label: 'Clean',
+    },
+    {
+      field: 'wild',
+      scoreType: 'books',
+      label: 'Wild',
+    },
+  ]
 
   const handleIncreaseCount = (id, key) => {}
 
@@ -55,16 +67,25 @@ const RoundScorePage = () => {
             <div className='mt-5 md:col-span-2 md:mt-0'>
               <div className='grid grid-cols-6 gap-6'>
                 <div className='col-span-6 sm:col-span-3 flex space-x-2 items-center'>
-                  <label htmlFor='first-name' className='block text-sm font-medium text-gray-700'>
-                    Dirty
-                  </label>
-                  <input
-                    type='text'
-                    name='first-name'
-                    id='first-name'
-                    autoComplete='given-name'
-                    className='mt-1 block w-1/6 rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm'
-                  />
+                  {books?.map(book => (
+                    <div key={book?.field}>
+                      <label
+                        htmlFor='first-name'
+                        className='block text-sm font-medium text-gray-700'
+                      >
+                        {book?.label}
+                      </label>
+                      <input
+                        type='number'
+                        name={book?.field}
+                        id={playersState?.[0]?.id}
+                        autoComplete='given-name'
+                        className='mt-1 block w-1/6 rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm'
+                        onChange={e => handleScoreStateChange(e.target, book?.scoreType)}
+                      />
+                    </div>
+                  ))}
+
                   <div className='flex flex-col justify-between mt-1'>
                     <IconButton
                       size={'sm'}
