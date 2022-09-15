@@ -1,6 +1,7 @@
 // @flow
 
 import { useEffect, useState } from 'react'
+import ScorecardSection from '../components/Scorecard/ScorecardSection'
 import { colorThemes } from '../configs/global-styles'
 import Button from '../CustomComponents/Button'
 import IconButton from '../CustomComponents/IconButton'
@@ -9,27 +10,12 @@ import { useGameContext } from '../HOC/withGameContext'
 import { usePlayerContext } from '../HOC/withPlayerContext'
 
 const RoundScorePage = () => {
-  const { playersState } = usePlayerContext()
-  const { handleScoreStateChange } = useGameContext()
+  const { playersState, setActivePlayer, getInactivePlayers } = usePlayerContext()
+  const { handleScoreStateChange, gameState } = useGameContext()
 
-  const initialActiveScore = { id: playersState?.[0]?.id, name: playersState?.[0]?.name }
+  const activeRoundIdx = gameState?.findIndex(round => round?.isActive)
 
-  const [isActiveScore, setIsActiveScore] = useState(initialActiveScore)
-
-  const [isNonActiveScore, setIsNonActiveScore] = useState(null)
-
-  useEffect(() => {
-    let initialNonActiveScore = []
-    playersState?.forEach(player => {
-      if (player?.id !== isActiveScore?.id) {
-        initialNonActiveScore.push({ id: player?.id, name: player?.name })
-      }
-    })
-
-    setIsNonActiveScore(initialNonActiveScore)
-  }, [isActiveScore])
-
-  const books = [
+  const bookFields = [
     {
       field: 'dirty',
       scoreType: 'books',
@@ -47,80 +33,81 @@ const RoundScorePage = () => {
     },
   ]
 
-  const handleIncreaseCount = (id, key) => {}
+  const playedCardsFields = [
+    {
+      field: 'fivePointCards',
+      scoreType: 'playedCards',
+      label: '5pt cards',
+    },
+    {
+      field: 'tenPointCards',
+      scoreType: 'playedCards',
+      label: '10pt cards',
+    },
+    {
+      field: 'twentyPointCards',
+      scoreType: 'playedCards',
+      label: '20pt cards',
+    },
+    {
+      field: 'fiftyPointCards',
+      scoreType: 'playedCards',
+      label: '50pt cards',
+    },
+  ]
+
+  const heldCardsFields = [
+    {
+      field: 'fivePointCards',
+      scoreType: 'heldCards',
+      label: '5pt cards',
+    },
+    {
+      field: 'tenPointCards',
+      scoreType: 'heldCards',
+      label: '10pt cards',
+    },
+    {
+      field: 'twentyPointCards',
+      scoreType: 'heldCards',
+      label: '20pt cards',
+    },
+    {
+      field: 'fiftyPointCards',
+      scoreType: 'heldCards',
+      label: '50pt cards',
+    },
+    {
+      field: 'redThrees',
+      scoreType: 'heldCards',
+      label: 'Red Threes',
+    },
+  ]
+
+  const inactivePlayers = getInactivePlayers() ?? null
+  const activePlayerIdx = playersState?.findIndex(player => player?.isActive)
 
   return (
     <>
       <div className='space-y-6'>
-        <div className='flex justify-between'>
+        <div className='flex flex-col justify-between items-center'>
           <h2 className='text-3xl font-bold tracking-tight text-sky-700'>
-            {playersState?.[0]?.name}
+            Scoring {playersState?.[activePlayerIdx]?.name}
           </h2>
-          {/* {playersState?.filter(player => {})}
-          <Button title={'Score Other'} size={'xs'} /> */}
-        </div>
-        <div className='bg-white px-4 py-5 shadow sm:rounded-lg sm:p-6'>
-          <div className='md:grid md:grid-cols-3 md:gap-6'>
-            <div className='md:col-span-1'>
-              <h3 className='text-lg font-medium leading-6 text-gray-900'>Books</h3>
-            </div>
-            <div className='mt-5 md:col-span-2 md:mt-0'>
-              <div className='grid grid-cols-6 gap-6'>
-                <div className='col-span-6 sm:col-span-3 flex space-x-2 items-center'>
-                  {books?.map(book => (
-                    <div key={book?.field}>
-                      <label
-                        htmlFor='first-name'
-                        className='block text-sm font-medium text-gray-700'
-                      >
-                        {book?.label}
-                      </label>
-                      <input
-                        type='number'
-                        name={book?.field}
-                        id={playersState?.[0]?.id}
-                        autoComplete='given-name'
-                        className='mt-1 block w-1/6 rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm'
-                        onChange={e => handleScoreStateChange(e.target, book?.scoreType)}
-                      />
-                    </div>
-                  ))}
-
-                  <div className='flex flex-col justify-between mt-1'>
-                    <IconButton
-                      size={'sm'}
-                      onClick={() => handleIncreaseCount()}
-                      icon='plusSm'
-                      customIconStyle={colorThemes.primary.iconText}
-                    />
-                    <IconButton
-                      size={'sm'}
-                      // onClick={() => removePlayer(index)}
-                      icon='minus'
-                      customIconStyle={colorThemes.primary.iconText}
-                    />
-                  </div>
-                </div>
-
-                <div className='col-span-6 sm:col-span-4'>
-                  <label
-                    htmlFor='email-address'
-                    className='block text-sm font-medium text-gray-700'
-                  >
-                    Wild
-                  </label>
-                  <input
-                    type='text'
-                    name='email-address'
-                    id='email-address'
-                    autoComplete='email'
-                    className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
-                  />
-                </div>
-              </div>
-            </div>
+          <div className='flex justify-around w-full'>
+            {inactivePlayers?.map(player => (
+              <Button
+                key={player?.id}
+                title={`Score ${player?.name}`}
+                size={'xs'}
+                onClick={() => setActivePlayer(player?.id)}
+              />
+            ))}
           </div>
         </div>
+        <ScorecardSection title={'Books'} fields={bookFields} />
+        <ScorecardSection title={'Played Cards'} fields={playedCardsFields} />
+        <ScorecardSection title={'Held Cards'} fields={heldCardsFields} />
       </div>
     </>
   )

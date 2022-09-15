@@ -14,13 +14,15 @@ const RoundScorePage = lazy(() => import('./pages/RoundScorePage'))
 
 function App() {
   const [step, setStep] = useState('start')
-  const { playersState } = usePlayerContext()
+  const { playersState, setActivePlayer } = usePlayerContext()
   const { gameState, setGameState, scorecard } = useGameContext()
   const activeRound = gameState?.filter(round => round?.isActive)[0]
 
   const setupPlayersScoreData = () => {
     let newGameState = [...gameState]
     let playerScorecard = []
+
+    setActivePlayer(playersState?.[0]?.id)
 
     playersState?.forEach(player => {
       playerScorecard?.push({ ...scorecard, name: player?.name, id: player?.id })

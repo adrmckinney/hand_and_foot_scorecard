@@ -19,6 +19,30 @@ export const usePlayerContext = () => {
   const touched = useContext(FieldTouchedContext)
   const setTouched = useContext(SetFieldTouchedContext)
   const handleTouched = useContext(HandleTouchedContext)
+
+  const getInactivePlayers = () => {
+    return playersState
+      ?.filter(player => !player?.isActive)
+      ?.map(player => {
+        return {
+          id: player?.id,
+          name: player?.name,
+        }
+      })
+  }
+
+  const setActivePlayer = id => {
+    const currentActiveIdx = playersState?.findIndex(player => player?.isActive)
+    const newActivePlayerIdx = playersState?.findIndex(player => player?.id === id)
+
+    let newPlayersState = [...playersState]
+    newPlayersState[currentActiveIdx]['isActive'] = false
+    newPlayersState[newActivePlayerIdx]['isActive'] = true
+
+    setPlayersState(newPlayersState)
+  }
+  console.log('playersState', playersState)
+
   return {
     playersState,
     setPlayersState,
@@ -28,6 +52,8 @@ export const usePlayerContext = () => {
     touched,
     setTouched,
     handleTouched,
+    setActivePlayer,
+    getInactivePlayers,
   }
 }
 
@@ -39,13 +65,13 @@ export const withPlayerContext =
         id: v4(),
         name: '',
         score: 0,
-        playFirst: true,
+        isActive: true,
       },
       {
         id: v4(),
         name: '',
         score: 0,
-        playFirst: false,
+        isActive: false,
       },
     ]
     const [touched, setTouched] = useState({})

@@ -100,56 +100,36 @@ export const withGameContext =
       setGameState(newRoundValues)
     }
 
-    const books = {
-      dirty: 0,
-      clean: 0,
-      wild: 0,
-      sumBookPoints: 0,
-    }
-
-    const scoreCard = {
-      id: '',
-      name: '',
-      isActiveScoring: false,
-      winnerBonus: 0,
-      totalRoundPoints: 0,
-      books: books,
-      playedCards: {
-        fivePointCards: 0,
-        tenPointCards: 0,
-        twentyPointCards: 0,
-        fiftyPointCards: 0,
-        sumPlayedCards: 0,
-      },
-      heldCards: {
-        fivePointCards: 0,
-        tenPointCards: 0,
-        twentyPointCards: 0,
-        fiftyPointCards: 0,
-        redThrees: 0,
-        sumHeldCards: 0,
-      },
-    }
-
-    const round = {
-      round: 1,
-      meld_points: 50,
-      isActive: true,
-      winner: '',
-    }
-
     const handleScoreStateChange = ({ name, value, id: playerId }, scoreType) => {
       console.log('name', name)
+      console.log('value', value)
+      console.log('playerId', playerId)
       console.log('scoreType', scoreType)
-      console.log('activeRoundIdx', activeRoundIdx)
+
       const playerIndex = gameState?.[activeRoundIdx]?.['scorecards']?.findIndex(
         player => player?.id === playerId
       )
-      console.log('playerIndex', playerIndex)
 
-      const currentBooks = gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]?.books
+      const updatedScorecards = updateScorecards(name, value, scoreType, playerIndex)
+
+      const updatedRound = updateRound(updatedScorecards)
+
+      const updatedGameState = updateGameState(updatedRound)
+
+      setGameState(updatedGameState)
+      // const sumBooks = Object.values(
+      //   gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]?.books
+      // )?.reduce(book => book)
+      // console.log('sumBooks', sumBooks)
+    }
+
+    const updateScorecards = (name, value, scoreType, playerIndex) => {
+      const currentBooks = gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]?.[scoreType]
+      console.log('scoreType', scoreType)
       let newBooks = { ...currentBooks }
-      newBooks[name] = value
+
+      newBooks[name] = +value
+      newBooks['sumBookPoints'] = Object.values(newBooks)?.reduce((accum, curr) => accum + curr)
 
       const currentPlayerScorecard = gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]
       let newScorecard = { ...currentPlayerScorecard }
@@ -159,39 +139,22 @@ export const withGameContext =
       let newScorecards = [...currentScorecards]
       newScorecards[playerIndex] = newScorecard
 
-      console.log('newBooks', newBooks)
-      console.log('newScorecard', newScorecard)
-      console.log('newScorecards', newScorecards)
-      // console.log('newRounds', newRounds)
+      return newScorecards
+    }
 
-      // return setDescriptionInput(descriptionInput => ({
-      //   ...descriptionData,
-      //   [target]: [...descriptionData[target], Object.assign(propData, { key: v4() })],
-      // }))
+    const updateRound = updatedScorecards => {
+      const currentRound = gameState?.[activeRoundIdx]
+      let newRound = { ...currentRound }
+      newRound['scorecards'] = updatedScorecards
 
-      // object assign newBooks into score
+      return newRound
+    }
 
-      // let newRoundValues = [...gameState]
-      // let newScoringValues = {
-      //   ...newRoundValues[activeRoundIdx]['scoring'],
-      // }
-      // let newBookValues = {
-      //   ...newScoringValues[playerIndex][scoreType],
-      // }
+    const updateGameState = updatedRound => {
+      let newGameState = [...gameState]
+      newGameState[activeRoundIdx] = updatedRound
 
-      // newBookValues[name] = +value
-
-      // newScoringValues[playerIndex] = {
-      //   ...newScoringValues[playerIndex],
-      //   books: newBookValues,
-      // }
-
-      // newRoundValues[activeRoundIdx] = {
-      //   ...newRoundValues[activeRoundIdx],
-      //   scoring: newScoringValues,
-      // }
-
-      // setGameState(newRoundValues)
+      return newGameState
     }
 
     return (
