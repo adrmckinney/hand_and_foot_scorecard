@@ -88,7 +88,7 @@ function App() {
   ]
 
   return (
-    <div>
+    <>
       {renderPageContents?.map(content => (
         <ConditionalRender key={content.title} condition={step === content?.step}>
           <Page
@@ -98,7 +98,7 @@ function App() {
           />
         </ConditionalRender>
       ))}
-    </div>
+    </>
   )
 }
 

@@ -79,6 +79,17 @@ const initialGameRoundValues = [
   },
 ]
 
+const scoreValues = {
+  fivePointCards: 5,
+  tenPointCards: 10,
+  twentyPointCards: 20,
+  fiftyPointCards: 50,
+  redThrees: 300,
+  dirty: 300,
+  clean: 500,
+  wild: 1500,
+}
+
 export const withGameContext =
   Component =>
   ({ ...rest }) => {
@@ -86,6 +97,8 @@ export const withGameContext =
     const [gameState, setGameState] = useState(initialGameRoundValues)
     const activeRoundIdx = gameState?.findIndex(round => round?.isActive)
     console.log('gameState', gameState)
+    console.log('scorecards', gameState?.[activeRoundIdx]?.['scorecards'])
+
     const getNameById = id => {
       return playersState?.filter(player => player?.id === id)?.[0]?.name
     }
@@ -100,6 +113,30 @@ export const withGameContext =
       setGameState(newRoundValues)
     }
 
+    const getBookScores = books => {
+      const dirty = books?.dirty * scoreValues.dirty
+      const clean = books?.clean * scoreValues.clean
+      const wild = books?.wild * scoreValues.wild
+      return [dirty, clean, wild]
+    }
+
+    const getPlayedCardsScores = playedCards => {
+      const fivePointCards = playedCards?.fivePointCards * scoreValues.fivePointCards
+      const tenPointCards = playedCards?.tenPointCards * scoreValues.tenPointCards
+      const twentyPointCards = playedCards?.twentyPointCards * scoreValues.twentyPointCards
+      const fiftyPointCards = playedCards?.fiftyPointCards * scoreValues.fiftyPointCards
+      return [fivePointCards, tenPointCards, twentyPointCards, fiftyPointCards]
+    }
+
+    const getHeldCardsScores = playedCards => {
+      const fivePointCards = playedCards?.fivePointCards * scoreValues.fivePointCards
+      const tenPointCards = playedCards?.tenPointCards * scoreValues.tenPointCards
+      const twentyPointCards = playedCards?.twentyPointCards * scoreValues.twentyPointCards
+      const fiftyPointCards = playedCards?.fiftyPointCards * scoreValues.fiftyPointCards
+      const redThrees = playedCards?.redThrees * scoreValues.redThrees
+      return [fivePointCards, tenPointCards, twentyPointCards, fiftyPointCards, redThrees]
+    }
+
     const handleScoreStateChange = ({ name, value, id: playerId }, scoreType) => {
       console.log('name', name)
       console.log('value', value)
@@ -110,30 +147,55 @@ export const withGameContext =
         player => player?.id === playerId
       )
 
-      const updatedScorecards = updateScorecards(name, value, scoreType, playerIndex)
+      const updatedScoreTypes = updateScorecards(name, value, scoreType, playerIndex)
 
-      const updatedRound = updateRound(updatedScorecards)
+      const updatedPlayerScorecards = updatePlayerScrorecards(
+        updatedScoreTypes,
+        scoreType,
+        playerIndex
+      )
+
+      const updatedRound = updateRound(updatedPlayerScorecards)
 
       const updatedGameState = updateGameState(updatedRound)
 
       setGameState(updatedGameState)
-      // const sumBooks = Object.values(
-      //   gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]?.books
-      // )?.reduce(book => book)
-      // console.log('sumBooks', sumBooks)
     }
 
     const updateScorecards = (name, value, scoreType, playerIndex) => {
-      const currentBooks = gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]?.[scoreType]
-      console.log('scoreType', scoreType)
-      let newBooks = { ...currentBooks }
+      const currentScoreType =
+        gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]?.[scoreType]
 
-      newBooks[name] = +value
-      newBooks['sumBookPoints'] = Object.values(newBooks)?.reduce((accum, curr) => accum + curr)
+      let newScoreType = { ...currentScoreType }
+      newScoreType[name] = +value
 
+      switch (scoreType) {
+        case 'books':
+          newScoreType['sumBookPoints'] = getBookScores(newScoreType)?.reduce(
+            (accum, book) => accum + book
+          )
+          break
+        case 'playedCards':
+          newScoreType['sumPlayedCards'] = getPlayedCardsScores(newScoreType)?.reduce(
+            (accum, played) => accum + played
+          )
+          break
+        case 'heldCards':
+          newScoreType['sumHeldCards'] = getHeldCardsScores(newScoreType)?.reduce(
+            (accum, played) => accum + played
+          )
+          break
+        default:
+          return scoreType
+      }
+
+      return newScoreType
+    }
+
+    const updatePlayerScrorecards = (updatedScoreTypes, scoreType, playerIndex) => {
       const currentPlayerScorecard = gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]
       let newScorecard = { ...currentPlayerScorecard }
-      newScorecard[scoreType] = newBooks
+      newScorecard[scoreType] = updatedScoreTypes
 
       const currentScorecards = gameState?.[activeRoundIdx]?.['scorecards']
       let newScorecards = [...currentScorecards]
@@ -142,10 +204,10 @@ export const withGameContext =
       return newScorecards
     }
 
-    const updateRound = updatedScorecards => {
+    const updateRound = updatedPlayerScorecards => {
       const currentRound = gameState?.[activeRoundIdx]
       let newRound = { ...currentRound }
-      newRound['scorecards'] = updatedScorecards
+      newRound['scorecards'] = updatedPlayerScorecards
 
       return newRound
     }

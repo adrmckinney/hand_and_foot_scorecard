@@ -90,7 +90,7 @@ const RoundScorePage = () => {
   return (
     <>
       <div className='space-y-6'>
-        <div className='flex flex-col justify-between items-center'>
+        <div className='flex flex-col justify-between items-center space-y-4'>
           <h2 className='text-3xl font-bold tracking-tight text-sky-700'>
             Scoring {playersState?.[activePlayerIdx]?.name}
           </h2>
