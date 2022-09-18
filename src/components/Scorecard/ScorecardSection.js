@@ -3,7 +3,7 @@
 import { colorThemes } from '../../configs/global-styles'
 import IconButton from '../../CustomComponents/IconButton'
 import { useGameContext } from '../../HOC/withGameContext'
-import { usePlayerContext } from '../../HOC/withPlayerContext'
+import useGetActiveIndexes from '../../_helpers/useGetActiveIndexes'
 
 type Props = {
   title: String,
@@ -11,11 +11,8 @@ type Props = {
 }
 
 const ScorecardSection = ({ title, fields }: Props) => {
-  const { playersState, setActivePlayer, getInactivePlayers } = usePlayerContext()
   const { handleScoreStateChange, gameState } = useGameContext()
-  const activeRoundIdx = gameState?.findIndex(round => round?.isActive)
-  const inactivePlayers = getInactivePlayers() ?? null
-  const activePlayerIdx = playersState?.findIndex(player => player?.isActive)
+  const { activeRoundIdx, activePlayerIdx } = useGetActiveIndexes()
 
   const handleIncreaseCount = (name, id, scoreType) => {
     const currentValue = gameState?.[activeRoundIdx]?.scorecards?.[0]?.[scoreType]?.[name]
@@ -49,7 +46,7 @@ const ScorecardSection = ({ title, fields }: Props) => {
                             field?.scoreType
                           ]?.[field?.field] || 0
                         }
-                        id={playersState?.[activePlayerIdx]?.id}
+                        id={activePlayerIdx}
                         autoComplete='given-name'
                         className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm'
                         onChange={e => handleScoreStateChange(e.target, field?.scoreType)}
@@ -60,11 +57,7 @@ const ScorecardSection = ({ title, fields }: Props) => {
                       <IconButton
                         size={'sm'}
                         onClick={() =>
-                          handleIncreaseCount(
-                            field?.field,
-                            playersState?.[activePlayerIdx]?.id,
-                            field?.scoreType
-                          )
+                          handleIncreaseCount(field?.field, activePlayerIdx, field?.scoreType)
                         }
                         icon='plusSm'
                         customIconStyle={colorThemes.primary.iconText}

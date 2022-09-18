@@ -1,19 +1,15 @@
 // @flow
 
-import { useEffect, useState } from 'react'
 import ScorecardSection from '../components/Scorecard/ScorecardSection'
-import { colorThemes } from '../configs/global-styles'
 import Button from '../CustomComponents/Button'
-import IconButton from '../CustomComponents/IconButton'
-import Input from '../CustomComponents/input'
 import { useGameContext } from '../HOC/withGameContext'
 import { usePlayerContext } from '../HOC/withPlayerContext'
+import useGetActiveIndexes from '../_helpers/useGetActiveIndexes'
 
 const RoundScorePage = () => {
   const { playersState, setActivePlayer, getInactivePlayers } = usePlayerContext()
   const { handleScoreStateChange, gameState } = useGameContext()
-
-  const activeRoundIdx = gameState?.findIndex(round => round?.isActive)
+  const { activePlayerIdx } = useGetActiveIndexes()
 
   const bookFields = [
     {
@@ -85,7 +81,6 @@ const RoundScorePage = () => {
   ]
 
   const inactivePlayers = getInactivePlayers() ?? null
-  const activePlayerIdx = playersState?.findIndex(player => player?.isActive)
 
   return (
     <>

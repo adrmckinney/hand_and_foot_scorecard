@@ -31,6 +31,17 @@ export const usePlayerContext = () => {
       })
   }
 
+  const getRoundLosersIndexes = roundWinnerIdx => {
+    const loserIndexes = []
+
+    playersState.forEach((player, idx) => {
+      if (idx !== roundWinnerIdx) {
+        loserIndexes.push(idx)
+      }
+    })
+    return loserIndexes
+  }
+
   const setActivePlayer = id => {
     const currentActiveIdx = playersState?.findIndex(player => player?.isActive)
     const newActivePlayerIdx = playersState?.findIndex(player => player?.id === id)
@@ -54,6 +65,7 @@ export const usePlayerContext = () => {
     handleTouched,
     setActivePlayer,
     getInactivePlayers,
+    getRoundLosersIndexes,
   }
 }
 

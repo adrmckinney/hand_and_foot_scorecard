@@ -2,10 +2,12 @@
 
 import { useGameContext } from '../HOC/withGameContext'
 import { usePlayerContext } from '../HOC/withPlayerContext'
+import useGetActiveIndexes from '../_helpers/useGetActiveIndexes'
 
 const RoundWinnerPage = () => {
   const { playersState } = usePlayerContext()
-  const { handleGameStateChange } = useGameContext()
+  const { handleRoundStateChange, handleScoreStateChange } = useGameContext()
+  const { activePlayerIdx } = useGetActiveIndexes()
 
   return (
     <>
@@ -24,11 +26,14 @@ const RoundWinnerPage = () => {
               </div>
               <div className='ml-3 flex h-5 items-center'>
                 <input
-                  id={player?.id}
+                  id={activePlayerIdx}
                   name={`winner`}
                   type='radio'
                   className='h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500'
-                  onClick={e => handleGameStateChange(e.target)}
+                  onClick={e => {
+                    handleRoundStateChange(e.target)
+                    handleScoreStateChange({ name: 'winnerBonus', value: 100 })
+                  }}
                 />
               </div>
             </div>

@@ -3,13 +3,13 @@ import { usePlayerContext } from './withPlayerContext'
 
 const GameStateContext = createContext()
 const SetGameStateContext = createContext()
-const InputChangeContext = createContext()
+const RoundChangeContext = createContext()
 const ScoreChangeContext = createContext()
 
 export const useGameContext = () => {
   const gameState = useContext(GameStateContext)
   const setGameState = useContext(SetGameStateContext)
-  const handleGameStateChange = useContext(InputChangeContext)
+  const handleRoundStateChange = useContext(RoundChangeContext)
   const handleScoreStateChange = useContext(ScoreChangeContext)
 
   const bookScores = {
@@ -46,7 +46,7 @@ export const useGameContext = () => {
   return {
     gameState,
     setGameState,
-    handleGameStateChange,
+    handleRoundStateChange,
     handleScoreStateChange,
     scorecard,
   }
@@ -93,17 +93,16 @@ const scoreValues = {
 export const withGameContext =
   Component =>
   ({ ...rest }) => {
-    const { playersState } = usePlayerContext()
+    const { playersState, getInactivePlayers, getRoundLosersIndexes } = usePlayerContext()
     const [gameState, setGameState] = useState(initialGameRoundValues)
     const activeRoundIdx = gameState?.findIndex(round => round?.isActive)
     console.log('gameState', gameState)
-    console.log('scorecards', gameState?.[activeRoundIdx]?.['scorecards'])
 
     const getNameById = id => {
       return playersState?.filter(player => player?.id === id)?.[0]?.name
     }
 
-    const handleGameStateChange = ({ name, id }) => {
+    const handleRoundStateChange = ({ name, id }) => {
       const playerName = getNameById(id)
 
       let newRoundValues = [...gameState]
@@ -137,34 +136,37 @@ export const withGameContext =
       return [fivePointCards, tenPointCards, twentyPointCards, fiftyPointCards, redThrees]
     }
 
-    const handleScoreStateChange = ({ name, value, id: playerId }, scoreType) => {
+    const handleScoreStateChange = ({ name, value, id: activePlayerIdx }, scoreType) => {
       console.log('name', name)
       console.log('value', value)
-      console.log('playerId', playerId)
       console.log('scoreType', scoreType)
 
-      const playerIndex = gameState?.[activeRoundIdx]?.['scorecards']?.findIndex(
-        player => player?.id === playerId
-      )
+      switch (name) {
+        case 'winnerBonus':
+          const currentPlayerScorecards = gameState?.[activeRoundIdx]?.['scorecards']
+          const updatedRoundPartialMutate = updateRound(currentPlayerScorecards, name, value)
+          const updatedGameStatePartialMutate = updateGameState(updatedRoundPartialMutate)
 
-      const updatedScoreTypes = updateScorecards(name, value, scoreType, playerIndex)
+          setGameState(updatedGameStatePartialMutate)
+          break
+        default:
+          const updatedScoreTypes = updateScorecards(name, value, scoreType, activePlayerIdx)
+          const updatedPlayerScorecards = updatePlayerScrorecards(
+            updatedScoreTypes,
+            scoreType,
+            activePlayerIdx
+          )
+          const updatedRound = updateRound(updatedPlayerScorecards)
+          const updatedGameState = updateGameState(updatedRound)
 
-      const updatedPlayerScorecards = updatePlayerScrorecards(
-        updatedScoreTypes,
-        scoreType,
-        playerIndex
-      )
-
-      const updatedRound = updateRound(updatedPlayerScorecards)
-
-      const updatedGameState = updateGameState(updatedRound)
-
-      setGameState(updatedGameState)
+          setGameState(updatedGameState)
+          break
+      }
     }
 
-    const updateScorecards = (name, value, scoreType, playerIndex) => {
+    const updateScorecards = (name, value, scoreType, activePlayerIdx) => {
       const currentScoreType =
-        gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]?.[scoreType]
+        gameState?.[activeRoundIdx]?.['scorecards']?.[activePlayerIdx]?.[scoreType]
 
       let newScoreType = { ...currentScoreType }
       newScoreType[name] = +value
@@ -192,21 +194,28 @@ export const withGameContext =
       return newScoreType
     }
 
-    const updatePlayerScrorecards = (updatedScoreTypes, scoreType, playerIndex) => {
-      const currentPlayerScorecard = gameState?.[activeRoundIdx]?.['scorecards']?.[playerIndex]
+    const updatePlayerScrorecards = (updatedScoreTypes, scoreType, activePlayerIdx) => {
+      const currentPlayerScorecard = gameState?.[activeRoundIdx]?.['scorecards']?.[activePlayerIdx]
       let newScorecard = { ...currentPlayerScorecard }
       newScorecard[scoreType] = updatedScoreTypes
 
       const currentScorecards = gameState?.[activeRoundIdx]?.['scorecards']
       let newScorecards = [...currentScorecards]
-      newScorecards[playerIndex] = newScorecard
+      newScorecards[activePlayerIdx] = newScorecard
 
       return newScorecards
     }
 
-    const updateRound = updatedPlayerScorecards => {
+    const updateRound = (updatedPlayerScorecards, name = null, value = null) => {
       const currentRound = gameState?.[activeRoundIdx]
       let newRound = { ...currentRound }
+
+      if (name !== null) {
+        // when selecting a different winner, the loser indxs don't change
+        console.log('getRoundLosersIndexes()', getRoundLosersIndexes(activeRoundIdx))
+        newRound[name] = value
+      }
+
       newRound['scorecards'] = updatedPlayerScorecards
 
       return newRound
@@ -222,11 +231,11 @@ export const withGameContext =
     return (
       <GameStateContext.Provider value={gameState}>
         <SetGameStateContext.Provider value={setGameState}>
-          <InputChangeContext.Provider value={handleGameStateChange}>
+          <RoundChangeContext.Provider value={handleRoundStateChange}>
             <ScoreChangeContext.Provider value={handleScoreStateChange}>
               <Component {...rest} />
             </ScoreChangeContext.Provider>
-          </InputChangeContext.Provider>
+          </RoundChangeContext.Provider>
         </SetGameStateContext.Provider>
       </GameStateContext.Provider>
     )
