@@ -9,7 +9,11 @@ const useGetActiveIndexes = () => {
 
   const activePlayerIdx = playersState?.findIndex(player => player?.isActive)
 
-  return { activeRoundIdx, activePlayerIdx }
+  const activePlayerId = playersState
+    ?.filter(player => player?.isActive)
+    ?.map(player => player.id)[0]
+
+  return { activeRoundIdx, activePlayerIdx, activePlayerId }
 }
 
 export default useGetActiveIndexes

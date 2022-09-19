@@ -1,5 +1,6 @@
 // @flow
 
+import { act } from 'react-dom/test-utils'
 import { colorThemes } from '../../configs/global-styles'
 import IconButton from '../../CustomComponents/IconButton'
 import { useGameContext } from '../../HOC/withGameContext'
@@ -12,13 +13,16 @@ type Props = {
 
 const ScorecardSection = ({ title, fields }: Props) => {
   const { handleScoreStateChange, gameState } = useGameContext()
-  const { activeRoundIdx, activePlayerIdx } = useGetActiveIndexes()
-
+  const { activeRoundIdx, activePlayerIdx, activePlayerId } = useGetActiveIndexes()
+  console.log('activePlayerId in card section', activePlayerId)
   const handleIncreaseCount = (name, id, scoreType) => {
-    const currentValue = gameState?.[activeRoundIdx]?.scorecards?.[0]?.[scoreType]?.[name]
+    const currentValue =
+      gameState?.[activeRoundIdx]?.scorecards?.[activePlayerIdx]?.[scoreType]?.[name]
+    console.log('currentValue', currentValue)
     const value = currentValue + 1
     handleScoreStateChange({ name, value, id }, scoreType)
   }
+
   return (
     <>
       <div className='bg-white px-4 py-5 shadow sm:rounded-lg sm:p-6'>
@@ -46,7 +50,7 @@ const ScorecardSection = ({ title, fields }: Props) => {
                             field?.scoreType
                           ]?.[field?.field] || 0
                         }
-                        id={activePlayerIdx}
+                        id={activePlayerId}
                         autoComplete='given-name'
                         className='mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm'
                         onChange={e => handleScoreStateChange(e.target, field?.scoreType)}
@@ -57,7 +61,7 @@ const ScorecardSection = ({ title, fields }: Props) => {
                       <IconButton
                         size={'sm'}
                         onClick={() =>
-                          handleIncreaseCount(field?.field, activePlayerIdx, field?.scoreType)
+                          handleIncreaseCount(field?.field, activePlayerId, field?.scoreType)
                         }
                         icon='plusSm'
                         customIconStyle={colorThemes.primary.iconText}

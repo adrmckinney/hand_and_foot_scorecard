@@ -57,25 +57,25 @@ const initialGameRoundValues = [
     round: 1,
     meld_points: 50,
     isActive: true,
-    winner: '',
+    winnerId: '',
   },
   {
     round: 2,
     meld_points: 90,
     isActive: false,
-    winner: '',
+    winnerId: '',
   },
   {
     round: 3,
     meld_points: 120,
     isActive: false,
-    winner: '',
+    winnerId: '',
   },
   {
     round: 4,
     meld_points: 150,
     isActive: false,
-    winner: '',
+    winnerId: '',
   },
 ]
 
@@ -93,21 +93,23 @@ const scoreValues = {
 export const withGameContext =
   Component =>
   ({ ...rest }) => {
-    const { playersState, getInactivePlayers, getRoundLosersIndexes } = usePlayerContext()
+    const { playersState, getInactivePlayers, getRoundLosersIndexes, getPlayerNameById } =
+      usePlayerContext()
     const [gameState, setGameState] = useState(initialGameRoundValues)
     const activeRoundIdx = gameState?.findIndex(round => round?.isActive)
     console.log('gameState', gameState)
 
-    const getNameById = id => {
-      return playersState?.filter(player => player?.id === id)?.[0]?.name
+    const getActivePlayerIdx = playerId => {
+      console.log('playerId', playerId)
+      return gameState?.[activeRoundIdx]?.['scorecards']?.findIndex(scorecard => {
+        console.log('scorecard?.id', scorecard?.id)
+        return scorecard?.id === playerId
+      })
     }
 
     const handleRoundStateChange = ({ name, id }) => {
-      const playerName = getNameById(id)
-
       let newRoundValues = [...gameState]
-
-      newRoundValues[activeRoundIdx][name] = playerName
+      newRoundValues[activeRoundIdx][name] = id
 
       setGameState(newRoundValues)
     }
@@ -136,22 +138,31 @@ export const withGameContext =
       return [fivePointCards, tenPointCards, twentyPointCards, fiftyPointCards, redThrees]
     }
 
-    const handleScoreStateChange = ({ name, value, id: activePlayerIdx }, scoreType) => {
+    const handleScoreStateChange = ({ name, value, id }, scoreType) => {
       console.log('name', name)
       console.log('value', value)
+      console.log('id', id)
       console.log('scoreType', scoreType)
 
-      switch (name) {
+      const activePlayerIdx = getActivePlayerIdx(id)
+
+      switch (scoreType) {
         case 'winnerBonus':
           const currentPlayerScorecards = gameState?.[activeRoundIdx]?.['scorecards']
-          const updatedRoundPartialMutate = updateRound(currentPlayerScorecards, name, value)
+          const updatedPlayerScorecardsPartialMutate = updatePlayerScorecards(
+            currentPlayerScorecards,
+            scoreType,
+            activePlayerIdx,
+            value
+          )
+          const updatedRoundPartialMutate = updateRound(updatedPlayerScorecardsPartialMutate)
           const updatedGameStatePartialMutate = updateGameState(updatedRoundPartialMutate)
 
           setGameState(updatedGameStatePartialMutate)
           break
         default:
-          const updatedScoreTypes = updateScorecards(name, value, scoreType, activePlayerIdx)
-          const updatedPlayerScorecards = updatePlayerScrorecards(
+          const updatedScoreTypes = updateScorecardsTypes(name, value, scoreType, activePlayerIdx)
+          const updatedPlayerScorecards = updatePlayerScorecards(
             updatedScoreTypes,
             scoreType,
             activePlayerIdx
@@ -164,13 +175,24 @@ export const withGameContext =
       }
     }
 
-    const updateScorecards = (name, value, scoreType, activePlayerIdx) => {
+    // const updatedScoreTypes = updateScorecardsTypes(name, value, scoreType, activePlayerIdx)
+    // const updatedPlayerScorecards = updatePlayerScorecards(
+    //   updatedScoreTypes,
+    //   scoreType,
+    //   activePlayerIdx
+    // )
+    // const updatedRound = updateRound(updatedPlayerScorecards)
+    // const updatedGameState = updateGameState(updatedRound)
+
+    // setGameState(updatedGameState)
+    // }
+
+    const updateScorecardsTypes = (name, value, scoreType, activePlayerIdx) => {
       const currentScoreType =
         gameState?.[activeRoundIdx]?.['scorecards']?.[activePlayerIdx]?.[scoreType]
-
       let newScoreType = { ...currentScoreType }
-      newScoreType[name] = +value
 
+      console.log('scoreType in updatescoretype', scoreType)
       switch (scoreType) {
         case 'books':
           newScoreType['sumBookPoints'] = getBookScores(newScoreType)?.reduce(
@@ -188,16 +210,34 @@ export const withGameContext =
           )
           break
         default:
-          return scoreType
+          return newScoreType
       }
 
       return newScoreType
     }
 
-    const updatePlayerScrorecards = (updatedScoreTypes, scoreType, activePlayerIdx) => {
+    const updatePlayerScorecards = (
+      updatedScoreTypes,
+      scoreType,
+      activePlayerIdx,
+      value = null
+    ) => {
+      console.log('activePlayerIdx in updatedPlayer sc', activePlayerIdx)
       const currentPlayerScorecard = gameState?.[activeRoundIdx]?.['scorecards']?.[activePlayerIdx]
       let newScorecard = { ...currentPlayerScorecard }
-      newScorecard[scoreType] = updatedScoreTypes
+
+      if (scoreType === 'winnerBonus') {
+        newScorecard[scoreType] = updatedScoreTypes
+        newScorecard[scoreType] = +value
+
+        // if (name !== null) {
+        //   const currentWinnerId = gameState?.[activeRoundIdx]?.winnerId
+        //   console.log('getRoundLosersIndexes()', getRoundLosersIndexes(currentWinnerId))
+        //   newRound[name] = value
+        // }
+      } else {
+        newScorecard[scoreType] = updatedScoreTypes
+      }
 
       const currentScorecards = gameState?.[activeRoundIdx]?.['scorecards']
       let newScorecards = [...currentScorecards]
@@ -206,15 +246,9 @@ export const withGameContext =
       return newScorecards
     }
 
-    const updateRound = (updatedPlayerScorecards, name = null, value = null) => {
+    const updateRound = updatedPlayerScorecards => {
       const currentRound = gameState?.[activeRoundIdx]
       let newRound = { ...currentRound }
-
-      if (name !== null) {
-        // when selecting a different winner, the loser indxs don't change
-        console.log('getRoundLosersIndexes()', getRoundLosersIndexes(activeRoundIdx))
-        newRound[name] = value
-      }
 
       newRound['scorecards'] = updatedPlayerScorecards
 
