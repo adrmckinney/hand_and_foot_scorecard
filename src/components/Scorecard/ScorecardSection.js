@@ -1,6 +1,5 @@
 // @flow
 
-import { act } from 'react-dom/test-utils'
 import { colorThemes } from '../../configs/global-styles'
 import IconButton from '../../CustomComponents/IconButton'
 import { useGameContext } from '../../HOC/withGameContext'
@@ -14,12 +13,20 @@ type Props = {
 const ScorecardSection = ({ title, fields }: Props) => {
   const { handleScoreStateChange, gameState } = useGameContext()
   const { activeRoundIdx, activePlayerIdx, activePlayerId } = useGetActiveIndexes()
-  console.log('activePlayerId in card section', activePlayerId)
-  const handleIncreaseCount = (name, id, scoreType) => {
+
+  const increaseCount = (name, id, scoreType) => {
     const currentValue =
       gameState?.[activeRoundIdx]?.scorecards?.[activePlayerIdx]?.[scoreType]?.[name]
-    console.log('currentValue', currentValue)
     const value = currentValue + 1
+
+    handleScoreStateChange({ name, value, id }, scoreType)
+  }
+
+  const decreaseCount = (name, id, scoreType) => {
+    const currentValue =
+      gameState?.[activeRoundIdx]?.scorecards?.[activePlayerIdx]?.[scoreType]?.[name]
+    const value = currentValue - 1
+
     handleScoreStateChange({ name, value, id }, scoreType)
   }
 
@@ -48,7 +55,7 @@ const ScorecardSection = ({ title, fields }: Props) => {
                         value={
                           gameState?.[activeRoundIdx]?.scorecards?.[activePlayerIdx]?.[
                             field?.scoreType
-                          ]?.[field?.field] || 0
+                          ]?.[field?.field] || ''
                         }
                         id={activePlayerId}
                         autoComplete='given-name'
@@ -61,14 +68,16 @@ const ScorecardSection = ({ title, fields }: Props) => {
                       <IconButton
                         size={'sm'}
                         onClick={() =>
-                          handleIncreaseCount(field?.field, activePlayerId, field?.scoreType)
+                          increaseCount(field?.field, activePlayerId, field?.scoreType)
                         }
                         icon='plusSm'
                         customIconStyle={colorThemes.primary.iconText}
                       />
                       <IconButton
                         size={'sm'}
-                        // onClick={() => removePlayer(index)}
+                        onClick={() =>
+                          decreaseCount(field?.field, activePlayerId, field?.scoreType)
+                        }
                         icon='minus'
                         customIconStyle={colorThemes.primary.iconText}
                       />

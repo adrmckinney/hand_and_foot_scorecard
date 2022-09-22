@@ -2,13 +2,11 @@
 
 import ScorecardSection from '../components/Scorecard/ScorecardSection'
 import Button from '../CustomComponents/Button'
-import { useGameContext } from '../HOC/withGameContext'
 import { usePlayerContext } from '../HOC/withPlayerContext'
 import useGetActiveIndexes from '../_helpers/useGetActiveIndexes'
 
 const RoundScorePage = () => {
   const { playersState, setActivePlayer, getInactivePlayers } = usePlayerContext()
-  const { handleScoreStateChange, gameState } = useGameContext()
   const { activePlayerIdx } = useGetActiveIndexes()
 
   const bookFields = [

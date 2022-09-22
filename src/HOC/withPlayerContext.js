@@ -56,7 +56,6 @@ export const usePlayerContext = () => {
 
     setPlayersState(newPlayersState)
   }
-  console.log('playersState', playersState)
 
   return {
     playersState,
@@ -95,6 +94,9 @@ export const withPlayerContext =
     const [playersState, setPlayersState] = useState(initialValues)
 
     const handleChange = ({ name, value }, index) => {
+      console.log('name', name)
+      console.log('value', value)
+      console.log('index', index)
       let newInputValues = [...playersState]
       newInputValues[index][name] = value
 

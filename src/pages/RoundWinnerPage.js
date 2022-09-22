@@ -2,12 +2,10 @@
 
 import { useGameContext } from '../HOC/withGameContext'
 import { usePlayerContext } from '../HOC/withPlayerContext'
-import useGetActiveIndexes from '../_helpers/useGetActiveIndexes'
 
 const RoundWinnerPage = () => {
   const { playersState } = usePlayerContext()
   const { handleRoundStateChange, handleScoreStateChange } = useGameContext()
-  const { activePlayerIdx } = useGetActiveIndexes()
 
   return (
     <>
