@@ -57,6 +57,17 @@ export const usePlayerContext = () => {
     setPlayersState(newPlayersState)
   }
 
+  const setPlayerToPlayFirst = id => {
+    const currentActiveIdx = playersState?.findIndex(player => player?.playsFirst)
+    const newActivePlayerIdx = playersState?.findIndex(player => player?.id === id)
+
+    let newPlayersState = [...playersState]
+    newPlayersState[currentActiveIdx]['playsFirst'] = false
+    newPlayersState[newActivePlayerIdx]['playsFirst'] = true
+
+    setPlayersState(newPlayersState)
+  }
+
   return {
     playersState,
     setPlayersState,
@@ -67,6 +78,7 @@ export const usePlayerContext = () => {
     setTouched,
     handleTouched,
     setActivePlayer,
+    setPlayerToPlayFirst,
     getInactivePlayers,
     getPlayerNameById,
     getRoundLosersIndexes,
@@ -82,12 +94,14 @@ export const withPlayerContext =
         name: '',
         score: 0,
         isActive: true,
+        playsFirst: true,
       },
       {
         id: v4(),
         name: '',
         score: 0,
         isActive: false,
+        playsFirst: false,
       },
     ]
     const [touched, setTouched] = useState({})

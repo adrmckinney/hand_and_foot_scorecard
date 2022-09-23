@@ -3,6 +3,7 @@
 import { usePlayerContext } from '../HOC/withPlayerContext'
 import { useGameContext } from '../HOC/withGameContext'
 import ConditionalRender from '../CustomComponents/conditional-render'
+import Icon from '../CustomComponents/Icon'
 
 const RoundStartPage = () => {
   const { playersState } = usePlayerContext()
@@ -15,11 +16,15 @@ const RoundStartPage = () => {
       <div className='space-y-4 mt-6'>
         {playersState?.map(player => (
           <div key={player?.id} className={'w-full flex justify-around'}>
-            <div className='text-md font-medium text-gray-900 tracking-wider'>{player?.name}</div>
+            <div className={'flex text-md font-medium text-gray-900 tracking-wider'}>
+              <ConditionalRender condition={player?.playsFirst} falseRender={''}>
+                <div className='-ml-6'>
+                  <Icon icon={'star'} iconStatus='primary' />
+                </div>
+              </ConditionalRender>
+              {player?.name}
+            </div>
             <div className='text-md text-gray-900'>{activeRound?.meld_points}</div>
-            <ConditionalRender condition={player?.isActive}>
-              <div>goes first</div>
-            </ConditionalRender>
           </div>
         ))}
       </div>

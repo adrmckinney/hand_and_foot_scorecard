@@ -16,21 +16,21 @@ const RoundScorePage = lazy(() => import('./pages/RoundScorePage'))
 
 function App() {
   const [step, setStep] = useState('start')
-  const { playersState, setActivePlayer, handleChange } = usePlayerContext()
+  const { playersState, handleChange, setPlayerToPlayFirst } = usePlayerContext()
   const { gameState, setGameState, scorecard, handleRoundStateChange } = useGameContext()
   const { activeRoundIdx } = useGetActiveIndexes()
   const activeRound = gameState?.filter(round => round?.isActive)[0]
 
-  // some glitch in setting the new active player to go first on new round
-  const setNewActivePlayerToGoFirst = () => {
-    const currentActivePlayerIdx = playersState?.findIndex(player => player?.isActive)
+  const setNewActivePlayerToGoFirst = (activeRoundIndex = 0) => {
+    const currentPlayFirstPlayerIdx = playersState?.findIndex(player => player?.playsFirst)
     const playerCount = playersState?.length
+    console.log('activeRoundIndex', activeRoundIndex)
     let newActivePlayerId =
-      currentActivePlayerIdx + 1 === playerCount || activeRoundIdx === 0
+      currentPlayFirstPlayerIdx + 1 === playerCount || activeRoundIndex === 0
         ? playersState?.[0]?.id
-        : playersState?.[currentActivePlayerIdx + 1]?.id
-
-    setActivePlayer(newActivePlayerId)
+        : playersState?.[currentPlayFirstPlayerIdx + 1]?.id
+    console.log('newActivePlayerId', newActivePlayerId)
+    setPlayerToPlayFirst(newActivePlayerId)
   }
 
   const setupPlayersScoreData = () => {
@@ -49,14 +49,14 @@ function App() {
     setStep('start-round')
   }
 
-  const createNewRound = currentActiveRound => {
+  const createNewRound = currentActiveRoundNumber => {
     handleRoundStateChange({ name: 'isActive', value: false })
-    const currentMeldPoints = gameState?.[currentActiveRound - 1]?.meld_points
-    console.log('currentMeldPoints', currentMeldPoints)
+    const currentMeldPoints = gameState?.[activeRoundIdx]?.meld_points
+
     let newGameState = [
       ...gameState,
       {
-        round: currentActiveRound + 1,
+        round: currentActiveRoundNumber + 1,
         meld_points: currentMeldPoints < 150 ? currentMeldPoints + 30 : currentMeldPoints,
         isActive: true,
         winnerId: '',
@@ -65,13 +65,13 @@ function App() {
 
     let playerScorecard = []
 
-    setNewActivePlayerToGoFirst()
+    setNewActivePlayerToGoFirst(activeRoundIdx + 1)
 
     playersState?.forEach(player => {
       playerScorecard?.push({ ...scorecard, name: player?.name, id: player?.id })
     })
 
-    newGameState[currentActiveRound]['scorecards'] = playerScorecard
+    newGameState[currentActiveRoundNumber]['scorecards'] = playerScorecard
 
     setGameState(newGameState)
   }

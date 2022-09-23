@@ -24,6 +24,7 @@ import {
   BellIcon,
   CurrencyDollarIcon,
   ListBulletIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline'
 import { colorThemes } from '../configs/global-styles'
 
@@ -174,6 +175,18 @@ const Icon = ({
     minus: (
       <MinusSmallIcon
         className={`${sizes[size]} mr-2 self-center ${customIconStyle}`}
+        style={overrideIconStyle}
+        aria-hidden='true'
+      />
+    ),
+    star: (
+      <StarIcon
+        className={[
+          `${sizes[size]}`,
+          'mr-2 self-center',
+          `${iconStatus?.length > 0 ? colorThemes[iconStatus].iconText : ''}`,
+          `${customIconStyle}`,
+        ].join(' ')}
         style={overrideIconStyle}
         aria-hidden='true'
       />
