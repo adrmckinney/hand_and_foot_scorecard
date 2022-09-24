@@ -8,11 +8,9 @@ import { usePlayerContext } from '../HOC/withPlayerContext'
 import { v4 } from 'uuid'
 import IconButton from '../CustomComponents/IconButton'
 import { colorThemes } from '../configs/global-styles'
-import { useGameContext } from '../HOC/withGameContext'
 
 const GameSetupPage = () => {
   const { handleChange, playersState, setPlayersState } = usePlayerContext()
-  const { gameState, setGameState, scoringData } = useGameContext()
 
   const addPlayer = () => {
     setPlayersState([...playersState, { id: v4(), name: '', score: 0, playFirst: false }])

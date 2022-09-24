@@ -52,7 +52,6 @@ const Button = ({
         'focus:ring-offset-2',
         'leading-4',
         `${SIZES[size]}`,
-        // `${STATUSES[status]}`,
         `${buttonTheme[status]}`,
         `${LABEL_POSITION[labelPosition]}`,
         `${relativeGroup ? 'relative group' : ''}`,
@@ -106,23 +105,4 @@ const LABEL_POSITION = {
   left: 'justify-start',
   center: 'justify-center',
   right: 'justify-end',
-}
-
-const STATUSES = {
-  mobileHamburger: [
-    'bg-mediumPurple',
-    'inline-flex',
-    'items-center',
-    'text-indigo-200',
-    'hover:text-white',
-    'hover:bg-darkerPurple',
-    'hover:bg-opacity-75',
-    'focus:outline-none',
-    'focus:ring-2',
-    'focus:ring-offset-2',
-    'focus:ring-offset-darkerPurple',
-    'focus:ring-white',
-  ].join(' '),
-  icon: 'bg-transparent',
-  null: '',
 }
