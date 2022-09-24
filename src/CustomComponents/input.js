@@ -4,8 +4,8 @@ import React from 'react'
 import ConditionalRender from './conditional-render'
 import HorizontalLayout from '../CustomComponents/horizontal-layout'
 import { fontThemes, inputThemes } from '../configs/global-styles'
-import InputErrorMessage from './input-error-message'
 import Icon from './Icon'
+import InputErrorMessage from '../components/Errors/InputErrorMessage'
 
 type Props = {
   fieldValidationIcon?: Boolean,

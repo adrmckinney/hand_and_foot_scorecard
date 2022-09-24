@@ -117,10 +117,6 @@ export const withGameContext =
     }
 
     const handleScoreStateChange = ({ name, value, id }, scoreType) => {
-      console.log('name', name)
-      console.log('value', value)
-      console.log('scoreType', scoreType)
-
       const activePlayerIdx = getActivePlayerIdx(id)
 
       switch (scoreType) {

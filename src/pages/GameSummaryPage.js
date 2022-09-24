@@ -6,10 +6,9 @@ import { usePlayerContext } from '../HOC/withPlayerContext'
 const GameSummaryPage = () => {
   const { playersState } = usePlayerContext()
   const { gameState } = useGameContext()
-  console.log('playersState', playersState)
 
   const playerHighScore = playersState?.reduce((max, player) =>
-    max?.score > player?.score ? max : player
+    max?.score > player?.score ? max : null
   )
 
   return (
@@ -28,9 +27,8 @@ const GameSummaryPage = () => {
       </div>
       {gameState?.map((round, idx) => {
         const roundHighScore = round?.scorecards?.reduce((max, scorecard) =>
-          max?.totalRoundPoints > scorecard?.totalRoundPoints ? max : scorecard
+          max?.totalRoundPoints > scorecard?.totalRoundPoints ? max : null
         )
-
         return (
           <div key={round?.round} className='w-60 pt-12'>
             <h2 className='text-lg font-medium text-gray-900'>Round {idx + 1}</h2>
