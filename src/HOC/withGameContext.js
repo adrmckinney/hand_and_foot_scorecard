@@ -24,6 +24,7 @@ export const useGameContext = () => {
     name: '',
     isActiveScoring: false,
     winnerBonus: 0,
+    dealerBonus: 0,
     totalRoundPoints: 0,
     books: bookScores,
     playedCards: {
@@ -124,6 +125,7 @@ export const withGameContext =
 
       switch (scoreType) {
         case 'winnerBonus':
+        case 'dealerBonus':
           const currentPlayerScorecards = gameState?.[activeRoundIdx]?.['scorecards']
           const updatedPlayerScorecardsPartialMutate = updatePlayerScorecards(
             currentPlayerScorecards,
@@ -194,7 +196,7 @@ export const withGameContext =
       const currentScorecards = gameState?.[activeRoundIdx]?.['scorecards']
       let newScorecards = [...currentScorecards]
 
-      if (scoreType === 'winnerBonus') {
+      if (scoreType === 'winnerBonus' || scoreType === 'dealerBonus') {
         newScorecard[scoreType] = +value
         calculateRoundPointsTotalForPlayer(newScorecard)
         const winnerId = gameState?.[activeRoundIdx]?.winnerId
@@ -223,9 +225,11 @@ export const withGameContext =
       const sumBookPoints = scorecard?.books?.sumBookPoints
       const sumPlayedPoints = scorecard?.playedCards?.sumPlayedCards
       const sumHeldpoints = scorecard?.heldCards?.sumHeldCards
-      const bonus = scorecard?.winnerBonus
+      const winnerBonus = scorecard?.winnerBonus
+      const dealerBonus = scorecard?.dealerBonus
 
-      scorecard['totalRoundPoints'] = sumBookPoints + sumPlayedPoints + sumHeldpoints + bonus
+      scorecard['totalRoundPoints'] =
+        sumBookPoints + sumPlayedPoints + sumHeldpoints + winnerBonus + dealerBonus
     }
 
     const updateRound = updatedPlayerScorecards => {

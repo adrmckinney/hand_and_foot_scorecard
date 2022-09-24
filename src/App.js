@@ -1,4 +1,4 @@
-import { lazy, useState } from 'react'
+import { useState } from 'react'
 import OneButtonFooter from './components/one-button-footer'
 import TwoButtonFooter from './components/two-button-footer'
 import ConditionalRender from './CustomComponents/conditional-render'
@@ -7,12 +7,12 @@ import { usePlayerContext, withPlayerContext } from './HOC/withPlayerContext'
 import { useGameContext, withGameContext } from './HOC/withGameContext'
 import GameSummaryPage from './pages/GameSummaryPage'
 import useGetActiveIndexes from './_helpers/useGetActiveIndexes'
-
-const GameSetupPage = lazy(() => import('./pages/GameSetupPage'))
-const GameStartPage = lazy(() => import('./pages/GameStartPage'))
-const RoundStartPage = lazy(() => import('./pages/RoundStartPage'))
-const RoundWinnerPage = lazy(() => import('./pages/RoundWinnerPage'))
-const RoundScorePage = lazy(() => import('./pages/RoundScorePage'))
+import DealerScorePage from './pages/DealerScorePage'
+import GameSetupPage from './pages/GameSetupPage'
+import GameStartPage from './pages/GameStartPage'
+import RoundStartPage from './pages/RoundStartPage'
+import RoundWinnerPage from './pages/RoundWinnerPage'
+import RoundScorePage from './pages/RoundScorePage'
 
 function App() {
   const [step, setStep] = useState('start')
@@ -24,12 +24,12 @@ function App() {
   const setNewActivePlayerToGoFirst = (activeRoundIndex = 0) => {
     const currentPlayFirstPlayerIdx = playersState?.findIndex(player => player?.playsFirst)
     const playerCount = playersState?.length
-    console.log('activeRoundIndex', activeRoundIndex)
+
     let newActivePlayerId =
       currentPlayFirstPlayerIdx + 1 === playerCount || activeRoundIndex === 0
         ? playersState?.[0]?.id
         : playersState?.[currentPlayFirstPlayerIdx + 1]?.id
-    console.log('newActivePlayerId', newActivePlayerId)
+
     setPlayerToPlayFirst(newActivePlayerId)
   }
 
@@ -46,7 +46,7 @@ function App() {
     newGameState[activeRoundIdx]['scorecards'] = playerScorecard
     setGameState(newGameState)
 
-    setStep('start-round')
+    setStep('dealer-points')
   }
 
   const createNewRound = currentActiveRoundNumber => {
@@ -104,6 +104,19 @@ function App() {
       footerComponent: <OneButtonFooter title={'Start Game'} onClick={setupPlayersScoreData} />,
     },
     {
+      step: 'dealer-points',
+      title: `Round ${activeRound?.round} Dealer Points`,
+      component: <DealerScorePage />,
+      footerComponent: (
+        <TwoButtonFooter
+          leftBtnTitle={'Back'}
+          rightBtnTitle={'Start Round'}
+          leftOnClick={() => setStep('setup')}
+          rightOnClick={() => setStep('start-round')}
+        />
+      ),
+    },
+    {
       step: 'start-round',
       title: `Round ${activeRound?.round}`,
       component: <RoundStartPage />,
@@ -111,7 +124,7 @@ function App() {
         <TwoButtonFooter
           leftBtnTitle={'Back'}
           rightBtnTitle={'Round Over'}
-          leftOnClick={() => setStep('setup')}
+          leftOnClick={() => setStep('dealer-points')}
           rightOnClick={() => setStep('round-winner')}
         />
       ),
