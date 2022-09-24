@@ -172,7 +172,7 @@ function App() {
           }}
           rightOnClick={() => {
             createNewRound(activeRound?.round)
-            setStep('start-round')
+            setStep('dealer-points')
           }}
         />
       ),
