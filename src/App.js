@@ -13,6 +13,7 @@ import GameStartPage from './pages/GameStartPage'
 import RoundStartPage from './pages/RoundStartPage'
 import RoundWinnerPage from './pages/RoundWinnerPage'
 import RoundScorePage from './pages/RoundScorePage'
+import { withPlayersGameContext } from './HOC/withPlayerGameContext'
 
 function App() {
   const [step, setStep] = useState('start')

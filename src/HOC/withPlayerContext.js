@@ -80,7 +80,7 @@ export const usePlayerContext = () => {
 }
 
 export const withPlayerContext =
-  Component =>
+  (Component, playerValues = null) =>
   ({ ...rest }) => {
     const initialValues = [
       {
@@ -99,8 +99,8 @@ export const withPlayerContext =
       },
     ]
     const [touched, setTouched] = useState({})
-    const [playersState, setPlayersState] = useState(initialValues)
-
+    const [playersState, setPlayersState] = useState(playerValues ? playerValues : initialValues)
+    console.log('playerValues', playerValues)
     const handleChange = ({ name, value }, index) => {
       let newInputValues = [...playersState]
       newInputValues[index][name] = value

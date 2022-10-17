@@ -74,17 +74,17 @@ const scoreValues = {
 }
 
 export const withGameContext =
-  Component =>
+  (Component, gameValues = null) =>
   ({ ...rest }) => {
     const { getRoundLosersIndexes } = usePlayerContext()
-    const [gameState, setGameState] = useState(initialGameRoundValues)
+    const [gameState, setGameState] = useState(gameValues ? gameValues : initialGameRoundValues)
     const activeRoundIdx = gameState?.findIndex(round => round?.isActive)
     const getActivePlayerIdx = playerId => {
       return gameState?.[activeRoundIdx]?.['scorecards']?.findIndex(scorecard => {
         return scorecard?.id === playerId
       })
     }
-
+    console.log('gameValues', gameValues)
     const handleRoundStateChange = ({ name, id = null, value }) => {
       let newRoundValues = [...gameState]
       newRoundValues[activeRoundIdx][name] = id ?? value

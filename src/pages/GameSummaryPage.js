@@ -10,6 +10,8 @@ const GameSummaryPage = () => {
   const playerHighScore = playersState?.reduce((max, player) =>
     max?.score > player?.score ? max : null
   )
+  console.log('playerState', playersState)
+  console.log('gameState', gameState)
 
   return (
     <>
